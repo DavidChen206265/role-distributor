@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n="app_title">身份分发大厅</title>
+  </head>
+  <body>
+    <div id="app">
+      <div class="app-container">
+        <div style="text-align: right; margin-bottom: 10px">
+          <select
+            id="lang-select"
+            class="form-select"
+            style="width: auto; font-size: 12px; cursor: pointer"
+          >
+            <option value="zh">🇨🇳 中文</option>
+            <option value="en">🇬🇧 English</option>
+          </select>
+        </div>
+
+        <h1 data-i18n="app_title">身份分发大厅</h1>
+        <div id="status" class="status-text mb-20" data-i18n="connecting">
+          连接中...
+        </div>
+
+        <div id="auth-section">
+          <h3 class="text-white mb-15 mt-0" data-i18n="login_title">
+            账号登录 / 注册
+          </h3>
+          <div class="mb-10">
+            <input
+              type="text"
+              id="name-input"
+              class="form-input w-100 mb-10"
+              data-i18n="username_placeholder"
+              placeholder="输入用户名 (2-15位)"
+            />
+            <input
+              type="password"
+              id="pwd-input"
+              class="form-input w-100"
+              data-i18n="pwd_placeholder"
+              placeholder="输入密码 (新用户将自动注册)"
+            />
+          </div>
+          <div class="flex-row mt-15">
+            <button
+              id="btnLogin"
+              class="btn btn-green btn-lg flex-2"
+              data-i18n="login_btn"
+            >
+              登录 / 注册
+            </button>
+            <button
+              id="btnGuest"
+              class="btn btn-blue-grey btn-lg flex-1"
+              data-i18n="guest_btn"
+            >
+              游客免密进入
+            </button>
+          </div>
+        </div>
+
+        <div
+          id="lobby-section"
+          class="panel panel-indigo mb-20"
+          style="display: none"
+        >
+          <h3 class="text-white mt-0 mb-15">
+            <span data-i18n="welcome">欢迎回来, </span
+            ><span id="display-username" class="text-gold"></span>
+          </h3>
+          <button
+            id="btnCreate"
+            class="btn btn-accent-blue btn-xl w-100 mb-20"
+            data-i18n="create_room"
+          >
+            + 创建新房间
+          </button>
+
+          <div class="divider-top pt-20 flex-row">
+            <input
+              type="text"
+              id="room-input"
+              class="form-input flex-2 uppercase"
+              data-i18n="room_input_placeholder"
+              placeholder="输入6位大写房间号"
+            />
+            <button
+              id="btnJoin"
+              class="btn btn-orange btn-lg flex-1"
+              data-i18n="join_room"
+            >
+              加入房间
+            </button>
+          </div>
+          <div
+            id="quick-reconnect-area"
+            class="text-center mt-20"
+            style="display: none"
+          >
+            <p class="text-muted text-sm mb-5 m-0" data-i18n="last_room_tip">
+              您有一个上次未退出的房间
+            </p>
+            <button id="btnQuickReconnect" class="btn btn-green btn-lg w-100">
+              <span data-i18n="reconnect_btn">⚡ 快捷返回房间: </span
+              ><span id="quick-room-id"></span>
+            </button>
+          </div>
+        </div>
+
+        <div id="room-section" style="display: none">
+          <div class="flex-between mb-10">
+            <h2 class="text-green m-0 flex-row align-center gap-8">
+              <span data-i18n="room_no">房间号: </span
+              ><span id="display-roomId"></span>
+              <button
+                id="btnCopyRoom"
+                class="btn btn-green btn-sm"
+                data-i18n="copy"
+              >
+                复制
+              </button>
+            </h2>
+            <span class="text-sm text-muted">
+              <span data-i18n="active_players">活跃人数: </span
+              ><span id="display-count">0</span>
+            </span>
+          </div>
+
+          <div class="flex-row mb-15">
+            <button
+              id="btnExit"
+              class="btn btn-red btn-md"
+              style="display: none"
+              data-i18n="exit_room"
+            >
+              退出房间
+            </button>
+            <button
+              id="btnDisband"
+              class="btn btn-dark-red btn-md"
+              style="display: none"
+              data-i18n="disband_room"
+            >
+              解散房间
+            </button>
+          </div>
+
+          <div class="panel panel-deep-blue mb-20">
+            <div class="flex-between mb-10">
+              <h4 class="text-white m-0" data-i18n="realtime_list">
+                👥 实时玩家列表
+              </h4>
+              <button
+                id="btnEnforceRules"
+                class="btn btn-orange btn-sm"
+                style="display: none"
+                data-i18n="enforce_rules"
+              >
+                刷新并踢出违规者
+              </button>
+            </div>
+            <ul id="realtime-members-list" class="list-unstyled"></ul>
+            <div
+              id="hidden-list-msg"
+              class="text-orange text-13"
+              style="display: none"
+              data-i18n="hidden_list"
+            >
+              🔒 房主已隐藏玩家列表
+            </div>
+          </div>
+
+          <div
+            id="host-panel"
+            class="panel panel-dark mb-20"
+            style="display: none"
+          >
+            <h3 class="text-white mt-0 mb-15" data-i18n="host_panel">
+              👑 房主配置面板
+            </h3>
+            <div class="panel-inner mb-10">
+              <label class="label-block text-white mb-8">
+                <input type="checkbox" id="cb-host-participate" checked />
+                <span data-i18n="participate_check"
+                  >参与发牌 (取消则担任独立法官)</span
+                >
+              </label>
+              <label class="label-block text-white mb-8">
+                <input type="checkbox" id="cb-broadcast-comp" checked />
+                <span data-i18n="broadcast_check">发牌后公开身份构成</span>
+              </label>
+              <label class="label-block text-white mb-8">
+                <input type="checkbox" id="cb-show-list" checked />
+                <span data-i18n="show_list_check">允许玩家查看实时列表</span>
+              </label>
+              <label class="label-block text-red font-bold">
+                <input type="checkbox" id="cb-death-mode" />
+                <span data-i18n="death_mode_check"
+                  >开启死亡模式 (允许标记玩家存活状态)</span
+                >
+              </label>
+            </div>
+
+            <div class="panel-inner mb-15">
+              <h4
+                class="text-white text-sm m-0 mb-8"
+                data-i18n="access_control"
+              >
+                🛡️ 房间访问与名单控制
+              </h4>
+              <select id="select-access-mode" class="form-select w-100 mb-10">
+                <option value="allow_all" data-i18n="mode_all">
+                  🟢 允许所有用户加入 (接受访客)
+                </option>
+                <option value="blacklist" data-i18n="mode_black">
+                  🟠 黑名单模式 (拦截黑名单，拒访客)
+                </option>
+                <option value="whitelist" data-i18n="mode_white">
+                  🔴 白名单模式 (仅限白名单加入，拒访客)
+                </option>
+              </select>
+              <p
+                class="text-xxs text-light-muted mb-5 m-0"
+                data-i18n="batch_tip"
+              >
+                📝 批量管理：可输入多个用户名（空格、逗号分隔）
+              </p>
+              <div class="flex-row mb-5">
+                <div class="flex-1">
+                  <label
+                    class="text-light-green text-xs label-block mb-5"
+                    data-i18n="whitelist"
+                    >白名单</label
+                  >
+                  <textarea
+                    id="ta-whitelist"
+                    rows="3"
+                    class="form-textarea w-100"
+                  ></textarea>
+                </div>
+                <div class="flex-1">
+                  <label
+                    class="text-red text-xs label-block mb-5"
+                    data-i18n="blacklist"
+                    >黑名单</label
+                  >
+                  <textarea
+                    id="ta-blacklist"
+                    rows="3"
+                    class="form-textarea w-100"
+                  ></textarea>
+                </div>
+              </div>
+              <button
+                id="btnSaveLists"
+                class="btn btn-blue w-100 btn-save"
+                data-i18n="save_list"
+              >
+                💾 保存并应用配置
+              </button>
+            </div>
+
+            <div id="role-config-container" class="mb-10"></div>
+            <button
+              id="btnAddRole"
+              class="btn btn-inner-bg w-100 mb-10 text-white"
+              data-i18n="add_role"
+            >
+              + 添加身份
+            </button>
+            <button
+              id="btnDeal"
+              class="btn btn-carrot btn-lg w-100 mb-10"
+              data-i18n="deal_btn"
+            >
+              正式发牌
+            </button>
+
+            <button
+              id="btnRevealGroup"
+              class="btn btn-purple btn-lg w-100 mb-10"
+              style="display: none"
+              data-i18n="reveal_group_hint"
+            >
+              揭露指定身份 (如:狼人)
+            </button>
+            <button
+              id="btnReveal"
+              class="btn btn-red btn-lg w-100"
+              style="display: none"
+              data-i18n="reveal_all"
+            >
+              揭晓所有人身份
+            </button>
+            <button
+              id="btnReset"
+              class="btn btn-blue-grey btn-lg w-100 mt-10"
+              style="display: none"
+              data-i18n="reset_room"
+            >
+              🔄 重置房间 (重新发牌)
+            </button>
+          </div>
+
+          <div id="game-board" class="game-board mb-20" style="display: none">
+            <div class="text-center mb-15">
+              <div
+                id="personal-death-tag"
+                class="death-tag mb-10"
+                style="display: none"
+                data-i18n="dead_tag"
+              >
+                💀 【你已阵亡】 💀
+              </div>
+              <p class="m-0 text-light-gray" data-i18n="my_role_is">
+                你的身份是：
+              </p>
+              <h1 id="my-role-text" class="my-role-title"></h1>
+              <span id="my-role-type" class="text-xs text-muted"></span>
+            </div>
+            <hr class="divider-bottom" />
+            <h4 class="text-white m-0 mb-5" data-i18n="public_board_title">
+              📍 场上身份公开区：
+            </h4>
+            <div
+              id="composition-display"
+              class="composition-box mb-10"
+              style="display: none"
+            ></div>
+            <ul id="public-board-list" class="list-unstyled"></ul>
+          </div>
+
+          <hr class="divider-bottom" />
+          <h3 class="text-white mt-0 mb-15" data-i18n="log_title">房间日志:</h3>
+          <ul id="log" class="log-box list-unstyled"></ul>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
