@@ -21,12 +21,7 @@ module.exports = (io, socket, activeRooms, globalActiveUsers) => {
   }
 
   socket.on("user_login", ({ username }, callback) => {
-    const oldSocketId = globalActiveUsers[username];
-    if (oldSocketId && oldSocketId !== socket.id) {
-      io.to(oldSocketId).emit("force_logout");
-    }
-
-    globalActiveUsers[username] = socket.id;
+    handleDeviceConflict(username);
 
     let foundRoomId = null;
     for (const roomId in activeRooms) {
@@ -37,8 +32,6 @@ module.exports = (io, socket, activeRooms, globalActiveUsers) => {
         foundRoomId = roomId;
         player.status = "active";
         socket.join(roomId);
-
-        io.to(roomId).emit("room_state", room);
         break;
       }
     }
@@ -154,6 +147,14 @@ module.exports = (io, socket, activeRooms, globalActiveUsers) => {
         args: { user: username },
         roomData: room,
       });
+
+      if (room.gameState === "playing") {
+        io.to(roomId).emit("board_update", {
+          publicBoard: getPublicBoard(room),
+          composition: getComposition(room),
+          broadcastComposition: room.settings.broadcastComposition,
+        });
+      }
     } else {
       if (room.gameState === "playing")
         return socket.emit("error_msg", {

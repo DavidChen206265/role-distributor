@@ -346,6 +346,11 @@ DOM.btnReveal.addEventListener("click", () => {
 
 // automatically relogin after refresh if token exists
 window.addEventListener("DOMContentLoaded", () => {
+  if (sessionStorage.getItem("kicked")) {
+    sessionStorage.removeItem("kicked");
+    return;
+  }
+
   const savedToken = localStorage.getItem("authToken");
   const savedUsername = localStorage.getItem("authUsername");
 
@@ -358,12 +363,11 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 socket.on("force_logout", () => {
-  localStorage.removeItem("authToken");
-  localStorage.removeItem("authUsername");
+  sessionStorage.setItem("kicked", "true");
 
   socket.disconnect();
   alert(
-    t("alert_force_logout") || "Logged in on another device. Disconnecting!",
+    t("alert_force_logout") || "You have been logged out due to another login.",
   );
 
   window.location.reload();
