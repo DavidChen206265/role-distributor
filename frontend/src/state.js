@@ -7,5 +7,5 @@ export const state = {
   currentPlayersCount: 0,
   currentDeathMode: false,
   savedRoomId: localStorage.getItem("lastActiveRoomId") || "",
-  currentLang: localStorage.getItem("app_lang") || "zh",
+  currentLang: localStorage.getItem("app_lang") || "en",
 };
