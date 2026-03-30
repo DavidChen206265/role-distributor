@@ -27,8 +27,7 @@ function createRoleConfigRow(
   const rowId = `config-${state.configIdCounter++}`;
   const div = document.createElement("div");
   div.id = rowId;
-  div.style =
-    "display: flex; gap: 5px; margin-bottom: 8px; align-items: center;";
+  div.className = "role-config-row";
 
   div.innerHTML = `
     <input type="color" class="role-color" value="${color}" style="flex: 0 0 30px; width: 30px; height: 30px; padding: 0; border: 1px solid #555; border-radius: 4px; cursor: pointer;" />
@@ -68,9 +67,16 @@ async function performLogin(username, password, isGuest = false) {
 }
 
 function handleAuthSuccess(authData) {
+  // save token and username in localStorage for session persistence
+  localStorage.setItem("authToken", authData.token);
+  localStorage.setItem("authUsername", authData.user.username);
+
   state.currentUserToken = authData.token;
   state.currentUsername = authData.user.username;
   DOM.displayUsername.textContent = state.currentUsername;
+
+  // show logout button after successful login
+  document.getElementById("btn-logout").style.display = "inline-block";
 
   socket.emit("user_login", { username: state.currentUsername }, (response) => {
     if (response && response.roomId) {
@@ -223,6 +229,16 @@ document.getElementById("btnQuickReconnect").addEventListener("click", () => {
     });
 });
 
+document.getElementById("btn-logout").addEventListener("click", () => {
+  // clear authentication info from localStorage
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("authUsername");
+
+  socket.disconnect();
+
+  window.location.reload();
+});
+
 DOM.btnExit.addEventListener("click", () => {
   if (confirm(t("confirm_exit"))) {
     socket.emit("exit_room", state.currentRoomId);
@@ -326,4 +342,17 @@ DOM.btnDeal.addEventListener("click", () => {
 DOM.btnReveal.addEventListener("click", () => {
   if (confirm(t("confirm_reveal_all")))
     socket.emit("reveal_roles", state.currentRoomId);
+});
+
+// automatically relogin after refresh if token exists
+window.addEventListener("DOMContentLoaded", () => {
+  const savedToken = localStorage.getItem("authToken");
+  const savedUsername = localStorage.getItem("authUsername");
+
+  if (savedToken && savedUsername) {
+    handleAuthSuccess({
+      token: savedToken,
+      user: { username: savedUsername },
+    });
+  }
 });

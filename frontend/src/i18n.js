@@ -18,6 +18,7 @@ export const translations = {
     pwd_placeholder: "输入密码 (新用户将自动注册)",
     login_btn: "登录 / 注册",
     guest_btn: "游客免密进入",
+    btn_logout: "退出登录",
 
     welcome: "欢迎回来, ",
     create_room: "+ 创建新房间",
@@ -157,6 +158,7 @@ export const translations = {
     pwd_placeholder: "Password (auto-register for new)",
     login_btn: "Login / Register",
     guest_btn: "Guest Login",
+    btn_logout: "Logout",
 
     welcome: "Welcome back, ",
     create_room: "+ Create Room",

@@ -376,3 +376,27 @@ body {
 .my-role-title {
   margin: 5px 0;
 }
+
+.role-config-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+/* mobile */
+@media (max-width: 600px) {
+  .role-config-row>.role-name {
+    flex: 1 1 100px !important;
+  }
+
+  .role-config-row>.role-count {
+    flex: 1 1 40px !important;
+  }
+
+  .role-config-row>label {
+    font-size: 11px;
+    margin-right: 5px;
+  }
+}
