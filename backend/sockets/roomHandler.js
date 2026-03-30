@@ -12,7 +12,6 @@ module.exports = (io, socket, activeRooms, globalActiveUsers) => {
       globalActiveUsers[username] &&
       globalActiveUsers[username] !== socket.id
     ) {
-      // 发送登出代号
       io.to(globalActiveUsers[username]).emit("force_logout", {
         msgCode: "MSG_FORCE_LOGOUT",
       });
@@ -21,21 +20,32 @@ module.exports = (io, socket, activeRooms, globalActiveUsers) => {
     socket.username = username;
   }
 
-  socket.on("user_login", (data, callback) => {
-    const { username } = data;
-    handleDeviceConflict(username);
+  socket.on("user_login", ({ username }, callback) => {
+    const oldSocketId = globalActiveUsers[username];
+    if (oldSocketId && oldSocketId !== socket.id) {
+      io.to(oldSocketId).emit("force_logout");
+    }
+
+    globalActiveUsers[username] = socket.id;
 
     let foundRoomId = null;
     for (const roomId in activeRooms) {
-      const p = activeRooms[roomId].players.find(
-        (p) => p.username === username && p.status !== "left",
-      );
-      if (p) {
+      const room = activeRooms[roomId];
+      const player = room.players.find((p) => p.username === username);
+
+      if (player) {
         foundRoomId = roomId;
+        player.status = "active";
+        socket.join(roomId);
+
+        io.to(roomId).emit("room_state", room);
         break;
       }
     }
-    if (callback) callback({ roomId: foundRoomId });
+
+    if (typeof callback === "function") {
+      callback({ roomId: foundRoomId });
+    }
   });
 
   socket.on("create_room", (data) => {

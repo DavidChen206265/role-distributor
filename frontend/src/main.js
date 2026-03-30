@@ -356,3 +356,15 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+socket.on("force_logout", () => {
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("authUsername");
+
+  socket.disconnect();
+  alert(
+    t("alert_force_logout") || "Logged in on another device. Disconnecting!",
+  );
+
+  window.location.reload();
+});

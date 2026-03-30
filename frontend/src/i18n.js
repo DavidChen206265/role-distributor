@@ -140,6 +140,7 @@ export const translations = {
     confirm_reveal_single: "确定要单独揭晓 {user} 的身份吗？",
     confirm_ban: "确定要拉黑 {user} 吗？",
     confirm_kick: "确定要踢出 {user} 吗？",
+    alert_force_logout: "您的账号已在其他设备或窗口登录，您被迫下线！",
   },
   en: {
     app_title: "Role Distributor",
@@ -282,6 +283,7 @@ export const translations = {
     confirm_reveal_single: "Reveal {user}'s identity?",
     confirm_ban: "Ban {user}?",
     confirm_kick: "Kick {user}?",
+    alert_force_logout: "Logged in on another device. Disconnecting!",
   },
 };
 
