@@ -54,7 +54,7 @@ createRoleConfigRow(t("role_villager"), 1, true);
 
 // perform login or guest access
 async function performLogin(username, password, isGuest = false) {
-  const response = await fetch("http://localhost:3000/api/login", {
+  const response = await fetch("/api/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password, isGuest }),

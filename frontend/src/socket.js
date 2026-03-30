@@ -10,7 +10,7 @@ import {
 import { TEXT_SHADOW } from "./utils.js";
 import { t } from "./i18n.js";
 
-export const socket = io("http://localhost:3000");
+export const socket = io();
 
 export function setupSocketListeners() {
   socket.on("connect", () => {
